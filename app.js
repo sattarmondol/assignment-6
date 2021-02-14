@@ -22,7 +22,7 @@ const showImages = (images) => {
     images.forEach(image => {
         let div = document.createElement('div');
         div.className = 'col-lg-3 col-md-4 col-xs-6 img-item mb-2';
-        div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
+        div.innerHTML = ` <img id = 'img-hide' class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
         gallery.appendChild(div)
     })
 
@@ -30,11 +30,18 @@ const showImages = (images) => {
 
 const getImages = (query) => {
     fetch(`https://pixabay.com/api/?key=${KEY}&q=${query}&image_type=all&pretty=true`)
-
-
-    .then(response => response.json())
+        .then(response => response.json())
         .then(data => showImages(data.hits))
-        .catch(err => console.log(err))
+        .catch(err => getError("For Search By This Word Don't Get Nothing - Please Try another key-Words"))
+    document.getElementById('search').value = "";
+    document.getElementById("error-message").innerText = "";
+}
+
+
+// error message handler
+const getError = error => {
+    const errorTag = document.getElementById("error-message");
+    errorTag.innerText = error;
 }
 
 let slideIndex = 0;
@@ -46,13 +53,18 @@ const selectItem = (event, img) => {
     if (item === -1) {
         sliders.push(img);
     } else {
-        alert('Hey, Already added !')
+        sliders.pop(img);
+
+
     }
 }
+
+
 var timer
 const createSlider = () => {
     // check slider image length
     if (sliders.length < 2) {
+        // document.getElementById("duration").value = "";
         alert('Select at least 2 image.')
         return;
     }
@@ -78,11 +90,13 @@ const createSlider = () => {
     alt="">`;
         sliderContainer.appendChild(item)
     })
-    changeSlide(0)
-    timer = setInterval(function() {
-        slideIndex++;
-        changeSlide(slideIndex);
-    }, duration);
+    if (duration >= 1000) {
+        changeSlide(0)
+        timer = setInterval(function() {
+            slideIndex++;
+            changeSlide(slideIndex);
+        }, duration);
+    }
 }
 
 // change slider index 
@@ -119,6 +133,10 @@ searchBtn.addEventListener('click', function() {
     sliders.length = 0;
 })
 
-sliderBtn.addEventListener('click', function() {
-    createSlider()
-})
+
+// search area handle enter button
+document.getElementById('search').addEventListener("keypress", function(event) {
+    if (event.key === 'Enter') {
+        document.getElementById('search-btn').click();
+    }
+});
