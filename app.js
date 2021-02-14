@@ -16,19 +16,22 @@ const KEY = '20264459-c266a25c3dd1b14d5eb1f7fe4';
 // show images 
 const showImages = (images) => {
     imagesArea.style.display = 'block';
+    toggleSpinner();
     gallery.innerHTML = '';
     // show gallery title
     galleryHeader.style.display = 'flex';
     images.forEach(image => {
         let div = document.createElement('div');
         div.className = 'col-lg-3 col-md-4 col-xs-6 img-item mb-2';
-        div.innerHTML = ` <img id = 'img-hide' class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
+        div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
+
         gallery.appendChild(div)
     })
 
 }
 
 const getImages = (query) => {
+    toggleSpinner();
     fetch(`https://pixabay.com/api/?key=${KEY}&q=${query}&image_type=all&pretty=true`)
         .then(response => response.json())
         .then(data => showImages(data.hits))
@@ -47,15 +50,10 @@ const getError = error => {
 let slideIndex = 0;
 const selectItem = (event, img) => {
     let element = event.target;
-    element.classList.add('added');
-
     let item = sliders.indexOf(img);
+    element.classList.toggle('added');
     if (item === -1) {
         sliders.push(img);
-    } else {
-        sliders.pop(img);
-
-
     }
 }
 
@@ -64,10 +62,11 @@ var timer
 const createSlider = () => {
     // check slider image length
     if (sliders.length < 2) {
-        // document.getElementById("duration").value = "";
         alert('Select at least 2 image.')
+
         return;
     }
+
     // crate slider previous next area
     sliderContainer.innerHTML = '';
     const prevNext = document.createElement('div');
@@ -90,12 +89,12 @@ const createSlider = () => {
     alt="">`;
         sliderContainer.appendChild(item)
     })
-    if (duration >= 1000) {
+    if (duration >= 1) {
         changeSlide(0)
         timer = setInterval(function() {
             slideIndex++;
             changeSlide(slideIndex);
-        }, duration);
+        }, duration * 1000);
     }
 }
 
@@ -126,6 +125,7 @@ const changeSlide = (index) => {
 }
 
 searchBtn.addEventListener('click', function() {
+
     document.querySelector('.main').style.display = 'none';
     clearInterval(timer);
     const search = document.getElementById('search');
@@ -140,3 +140,16 @@ document.getElementById('search').addEventListener("keypress", function(event) {
         document.getElementById('search-btn').click();
     }
 });
+
+
+document.getElementById("createSlider-btn").addEventListener("click", function() {
+    createSlider();
+    document.getElementById("duration").value = "";
+});
+
+
+// Bonus / Extra content---detail button event handler
+const toggleSpinner = () => {
+    const spinner = document.getElementById("spinner");
+    spinner.classList.toggle('d-none');
+}
